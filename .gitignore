@@ -1,0 +1,12 @@
+.vscode
+env/
+.env/
+.env
+build/
+dist/
+downloads/
+lib/
+lib64
+parts/var
+.python-version
+__pycache__/
