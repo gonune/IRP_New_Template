@@ -36,13 +36,17 @@ The first iteration of development on this project expects that the user will th
 - [The Resource Links page](/docs/gettingStarted/resourceLinks.md) provides links to the Azure resources used to produce this project, accessible to those with the appropriate permissions.
 
 ## Development Steps
-[X] 1. Develop resource factory for generating instances of the AzureResource concrete classes (initial set of supported resources is documented in `src/ResourceFactory/README.md`)
+[X] 1. Develop resource factory for generating instances of the AzureResource concrete classes (initial set of supported resources is documented in [src/resourceFactory/README.md](/src/resourceFactory/README.md))
+
 [X] 2. Develop functionality for creating a collection of those instances and then producing a syntactically valid Azure ARM Template from them
+
 [ ] 3. Develop a ReactJS web frontend that meets the requirements documented above which includes:
     - Azure Active Directory authentication
     - Navigation that can support browser-level refresh and back button usage
     - RBAC-protected routes
-[ ] 4. Implement a middleware layer of JWT checking and validation against Azure Active Directory via Azure APIM
-[ ] 5. Separate the logic out into proper front, middle, and backend tiers (details documented in `src/resourceFactory/README.md`) where the backend should support RBAC-protected APIs using validated JWTs passed from the APIM instance. Note that this will require the frontend to be updated to make calls to the backend (and pass the JWT from login) rather than implementing all of the logic for creating ARM Templates itself.
+
+[ ] 4. Implement a middleware layer of JWT checking and validation against Azure Active Directory via Azure APIM ([reference](https://medium.com/devops-dudes/getting-started-with-azure-apim-and-jwt-token-verification-ddf2ef68966b))
+
+[ ] 5. Separate the logic out into proper front, middle, and backend tiers (details documented in [src/resourceFactory/README.md#planned-future-developments](/src/resourceFactory/README.md#planned-future-developments)) where the backend should support RBAC-protected APIs using validated JWTs passed from the APIM instance. Note that this will require the frontend to be updated to make calls to the backend (and pass the JWT from login) rather than implementing all of the logic for creating ARM Templates itself. ([reference](https://www.m-sterspace.io/posts/role-auth-azure-react))
 
 [Link to this project's Confluence page]()
