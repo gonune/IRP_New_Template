@@ -78,7 +78,7 @@ Once all the instances of each resource type(s) that should be included in the t
 - The separate methods in the ARMTemplate class will be compiled into a single, generalized method for creating `AzureResource`s
 - The ARMTemplate class and the Factory will be separated into a backend project
 - Individual methods for generating specific resources (similar to the createXXX() methods that exist on the ARMTemplate class today) will be surfaced via a JavaScript Express API which will communicate with the generic method in the backend and eventually onto the factory to create the resources
-- Additional functionality in the new JavaScript Express API will be developed to support a "shopping basket" for each user of the frontend application to keep track of the Azure resources that are currently "in their cart" as well as "checkout" functionality to produce the ARM Template for them when they're ready ([reference](https://www.delftstack.com/howto/node.js/node.js-send-file/))
+- Additional functionality in the new JavaScript Express API will be developed to support a "shopping basket" for each user of the frontend application to keep track of the Azure resources that are currently "in their cart" as well as "checkout" functionality to produce the ARM Template for them when they're ready ([reference](https://www.delftstack.com/howto/node.js/node.js-send-file/), [reference](https://blog.devgenius.io/react-tips-back-button-stop-event-bubbling-merging-states-5aca03bf50f9))
 - A React frontend application will be responsible for the user experience by providing a form that will allow them to select and configure the resources that they want to create and ultimately generate them by making calls to the JavaScript Express API via an `onSubmit` handler.
 
 
