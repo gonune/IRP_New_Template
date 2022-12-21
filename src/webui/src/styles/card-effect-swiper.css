@@ -1,0 +1,10 @@
+.swiper-pagination-progressbar.swiper-pagination-horizontal {
+  top: 500px;
+  width: 300px;
+  left: 50px;
+  background-color: white;
+}
+
+.swiper-pagination-progressbar-fill {
+  background-color: #22344d !important;
+}

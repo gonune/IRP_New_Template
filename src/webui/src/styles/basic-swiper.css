@@ -1,0 +1,34 @@
+/* Add padding to the bottom of the entire swiper component so that we */
+/* can render the pagination bullets underneath all of the cards */
+.swiper-wrapper {
+  padding-bottom: 40px;
+}
+
+/* Push the pagination bullets below all of the cards */
+.swiper-pagination-bullets.swiper-pagination-horizontal {
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+}
+
+/* Size of the Swiper itself */
+.swiper {
+  width: 90%;
+  height: 100%;
+}
+
+/* Center the Swipers inside of the navigation arrows */
+.swiper-slide {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
