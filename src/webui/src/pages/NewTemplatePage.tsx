@@ -3,28 +3,26 @@ import {
   Alert,
   Row,
   Col,
-  ButtonGroup,
   Form,
   FormGroup,
   Input,
-  Label
+  Label,
+  ButtonGroup
 } from 'reactstrap';
 
 import { CustomButton } from '../components/genericHOCs/CustomButton';
-import {
-  SupportedCloudProviders,
-  SupportedResourceTypes
-} from '../types/Supported';
+import { SupportedResourceTypes } from '../types/Supported';
 import { Tag, ResourceTagGroups, emptyTag } from '../types/Tag';
 import { StorageAccount } from '../types/StorageAccount';
 import { ResourceInputs } from '../components/newTemplate/ResourceInputs';
+import { ResourceTagInputs } from '../components/newTemplate/ResourceTagInputs';
+import { KeyObject } from 'crypto';
 
 // This component handles all state for the form
 // Reusable componentry exists in stateless form in ../components/newTemplate
 // https://itnext.io/how-to-build-a-dynamic-controlled-form-with-react-hooks-2019-b39840f75c4f
 export const NewTemplatePage: React.FC = () => {
-  const [cloudProvider, setCloudProvider] =
-    useState<SupportedCloudProviders>('Azure');
+  const [cloudProvider, setCloudProvider] = useState('Azure');
 
   // What resource types are requested for progressive disclosure
   const [SAChecked, setSAChecked] = useState(false);
@@ -33,8 +31,10 @@ export const NewTemplatePage: React.FC = () => {
   const [SAs, setSAs] = useState<StorageAccount[]>([]);
 
   // List of tags keyed by which resource they belong to
-  // {SA-0: [{name: '', value:''}, ...], SA-1: [{name: '', value:''}, ...]}
-  const [tags, setTags] = useState<ResourceTagGroups>({});
+  // {ALL-0: [{name: '', value:''}, ...], SA-0: [{name: '', value:''}, ...], SA-1: [{name: '', value:''}, ...]}
+  const [tags, setTags] = useState<ResourceTagGroups>({
+    [`ALL-0`]: [{ ...emptyTag }]
+  });
 
   //console.log(SAs);
   //console.log(tags);
@@ -60,10 +60,21 @@ export const NewTemplatePage: React.FC = () => {
   };
   const removeTagGroup = (
     type: SupportedResourceTypes,
-    resourceIndex: number
+    resourceIndex: number,
+    all: boolean = false
   ) => {
-    const { [`${type}-${resourceIndex}`]: group, ...rest } = { ...tags };
-    setTags((prevState: any) => rest);
+    if (all) {
+      const updatedTags = { ...tags };
+      for (const key in { ...tags }) {
+        if (key.startsWith(type)) {
+          delete updatedTags[`${key}`];
+        }
+      }
+      setTags((prevState: any) => updatedTags);
+    } else {
+      const { [`${type}-${resourceIndex}`]: group, ...rest } = { ...tags };
+      setTags((prevState: any) => rest);
+    }
   };
   const removeTagFromGroup = (
     type: SupportedResourceTypes,
@@ -147,7 +158,7 @@ export const NewTemplatePage: React.FC = () => {
       } else {
         setSAChecked(false);
         setSAs([]);
-        setTags({});
+        removeTagGroup('SA', 0, true);
       }
     }
   };
@@ -189,7 +200,8 @@ export const NewTemplatePage: React.FC = () => {
                       name="cloudProvider"
                       type="select"
                       style={{ width: 300 }}
-                      // onChange={(event) => handleInputChange(event)}
+                      value={cloudProvider}
+                      onChange={(event) => setCloudProvider(event.target.value)}
                     >
                       <option>Azure</option>
                     </Input>
@@ -201,32 +213,14 @@ export const NewTemplatePage: React.FC = () => {
                       <Row>
                         <Label className="h4">Resource tags</Label>
                       </Row>
-                      <Row>
-                        <Col>
-                          <Input
-                            id="tagName1"
-                            name="tagName1"
-                            placeholder="Enter tag name..."
-                          />
-                        </Col>
-                        <Col>
-                          <Input
-                            id="tagValue1"
-                            name="tagValue1"
-                            placeholder="Enter a tag value..."
-                          />
-                        </Col>
-                        <Col>
-                          <ButtonGroup>
-                            <CustomButton color="primary" outline>
-                              + Another set
-                            </CustomButton>
-                            <CustomButton color="primary" outline>
-                              - This set
-                            </CustomButton>
-                          </ButtonGroup>
-                        </Col>
-                      </Row>
+                      <ResourceTagInputs
+                        resource="ALL"
+                        resourceIndex={0}
+                        resourceTagGroups={tags}
+                        addTagToGroup={addTagToGroup}
+                        removeTagFromGroup={removeTagFromGroup}
+                        handleChange={handleChange}
+                      />
                     </FormGroup>
                   </Row>
                 </Col>
@@ -266,50 +260,86 @@ export const NewTemplatePage: React.FC = () => {
               />
             </Row>
 
-            <Row>
+            {/* <Row>
               <Row>
-                <Row>
-                  <FormGroup>
-                    <Input type="checkbox" />{' '}
-                    <Label check className="h4">
-                      Do you need a Function App?
-                    </Label>
-                  </FormGroup>
-                </Row>
-                {/* row for inputs */}
-                {/* div for add another*/}
+                <FormGroup>
+                  <Input
+                    type="checkbox"
+                    onChange={() => handleCheck('SA')}
+                    checked={SAChecked}
+                  />{' '}
+                  <Label check className="h4">
+                    Do you need a Function App?
+                  </Label>
+                </FormGroup>
               </Row>
+              <ResourceInputs
+                resourceType="SA"
+                resourceNeeded={SAChecked}
+                toggleResourceNeeded={handleCheck}
+                resourceList={SAs}
+                handleChange={handleChange}
+                addResource={addSA}
+                removeResource={removeSA}
+                resourceTagGroups={tags}
+                addTagToGroup={addTagToGroup}
+                removeTagFromGroup={removeTagFromGroup}
+              />
             </Row>
 
             <Row>
               <Row>
-                <Row>
-                  <FormGroup>
-                    <Input type="checkbox" />{' '}
-                    <Label check className="h4">
-                      Do you need an App Service?
-                    </Label>
-                  </FormGroup>
-                </Row>
-                {/* row for inputs */}
-                {/* div for add another*/}
+                <FormGroup>
+                  <Input
+                    type="checkbox"
+                    onChange={() => handleCheck('SA')}
+                    checked={SAChecked}
+                  />{' '}
+                  <Label check className="h4">
+                    Do you need an App Service?
+                  </Label>
+                </FormGroup>
               </Row>
+              <ResourceInputs
+                resourceType="SA"
+                resourceNeeded={SAChecked}
+                toggleResourceNeeded={handleCheck}
+                resourceList={SAs}
+                handleChange={handleChange}
+                addResource={addSA}
+                removeResource={removeSA}
+                resourceTagGroups={tags}
+                addTagToGroup={addTagToGroup}
+                removeTagFromGroup={removeTagFromGroup}
+              />
             </Row>
 
             <Row>
               <Row>
-                <Row>
-                  <FormGroup>
-                    <Input type="checkbox" />{' '}
-                    <Label check className="h4">
-                      Do you need a PostgreSQL Instance?
-                    </Label>
-                  </FormGroup>
-                </Row>
-                {/* row for inputs */}
-                {/* div for add another*/}
+                <FormGroup>
+                  <Input
+                    type="checkbox"
+                    onChange={() => handleCheck('SA')}
+                    checked={SAChecked}
+                  />{' '}
+                  <Label check className="h4">
+                    Do you need a PostgreSQL instance?
+                  </Label>
+                </FormGroup>
               </Row>
-            </Row>
+              <ResourceInputs
+                resourceType="SA"
+                resourceNeeded={SAChecked}
+                toggleResourceNeeded={handleCheck}
+                resourceList={SAs}
+                handleChange={handleChange}
+                addResource={addSA}
+                removeResource={removeSA}
+                resourceTagGroups={tags}
+                addTagToGroup={addTagToGroup}
+                removeTagFromGroup={removeTagFromGroup}
+              />
+            </Row> */}
           </Form>
           <br />
           <CustomButton
