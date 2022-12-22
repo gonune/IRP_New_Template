@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
 import { ExampleContext } from '../../context/exampleContext';
-import { CustomButton } from '../HOCs/CustomButton';
+import { CustomButton } from '../genericHOCs/CustomButton';
 
 export const ExampleComponentGettingDataFromContext: React.FC = () => {
   // Destructure the properties that we want from the context object(s)

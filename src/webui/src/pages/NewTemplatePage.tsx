@@ -3,32 +3,155 @@ import {
   Alert,
   Row,
   Col,
+  ButtonGroup,
   Form,
-  FormText,
   FormGroup,
   Input,
   Label
 } from 'reactstrap';
 
-import { CustomButton } from '../components/HOCs/CustomButton';
+import { CustomButton } from '../components/genericHOCs/CustomButton';
+import {
+  SupportedCloudProviders,
+  SupportedResourceTypes
+} from '../types/Supported';
+import { Tag, ResourceTagGroups, emptyTag } from '../types/Tag';
+import { StorageAccount } from '../types/StorageAccount';
+import { ResourceInputs } from '../components/newTemplate/ResourceInputs';
 
+// This component handles all state for the form
+// Reusable componentry exists in stateless form in ../components/newTemplate
+// https://itnext.io/how-to-build-a-dynamic-controlled-form-with-react-hooks-2019-b39840f75c4f
 export const NewTemplatePage: React.FC = () => {
-  // const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { target } = event;
-  //   const { name } = target;
+  const [cloudProvider, setCloudProvider] =
+    useState<SupportedCloudProviders>('Azure');
 
-  //   setRoleSelections([...roleSelections, name]);
-  // };
+  // What resource types are requested for progressive disclosure
+  const [SAChecked, setSAChecked] = useState(false);
 
-  // const submitForm = (event: React.MouseEvent<HTMLButtonElement>) => {
-  //   // Prevents the submit button from refreshing the page
-  //   event.preventDefault();
-  //   // Update the user's roles in the state store
-  //   updateRoles(roleSelections);
-  //   // Make sure the tooltip gets shut
-  //   setTooltipOpen(false);
-  //   toggleModal();
-  // };
+  // The input values for each resource type
+  const [SAs, setSAs] = useState<StorageAccount[]>([]);
+
+  // List of tags keyed by which resource they belong to
+  // {SA-0: [{name: '', value:''}, ...], SA-1: [{name: '', value:''}, ...]}
+  const [tags, setTags] = useState<ResourceTagGroups>({});
+
+  //console.log(SAs);
+  //console.log(tags);
+
+  // Resource tag handlers
+  const addTagGroup = (type: SupportedResourceTypes, resourceIndex: number) => {
+    setTags((prevState: any) => ({
+      ...prevState,
+      [`${type}-${resourceIndex}`]: [{ ...emptyTag }]
+    }));
+  };
+  const addTagToGroup = (
+    type: SupportedResourceTypes,
+    resourceIndex: number
+  ) => {
+    const group = `${type}-${resourceIndex}`;
+    const updatedTagList = tags[group];
+    updatedTagList.push({ ...emptyTag });
+    setTags((prevState: any) => ({
+      ...prevState,
+      [`${group}`]: updatedTagList
+    }));
+  };
+  const removeTagGroup = (
+    type: SupportedResourceTypes,
+    resourceIndex: number
+  ) => {
+    const { [`${type}-${resourceIndex}`]: group, ...rest } = { ...tags };
+    setTags((prevState: any) => rest);
+  };
+  const removeTagFromGroup = (
+    type: SupportedResourceTypes,
+    resourceIndex: number,
+    indexToRemove: number
+  ) => {
+    const group = `${type}-${resourceIndex}`;
+    const tagList = tags[group];
+    const updatedTagList = tagList.filter(
+      (tag: Tag, index: number) => index !== indexToRemove
+    );
+    setTags((prevState: any) => ({
+      ...prevState,
+      [`${group}`]: updatedTagList
+    }));
+  };
+
+  // Resource handlers for each type
+  const addSA = (resourceIndex: number) => {
+    setSAs([
+      ...SAs,
+      {
+        index: resourceIndex,
+        visible: true,
+        name: '',
+        tags: []
+      }
+    ]);
+    addTagGroup('SA', resourceIndex);
+  };
+  const removeSA = (indexToRemove: number) => {
+    //setSAs([...SAs.filter((_: any, index: any) => index !== indexToRemove)]);
+    const updatedSAs = [...SAs];
+    updatedSAs[indexToRemove]['visible'] = false;
+    setSAs(updatedSAs);
+    removeTagGroup('SA', indexToRemove);
+    // If we're executing this on the last item then the length will be 1 until
+    // after this function is done executing
+    if (SAs.length <= 1) {
+      setSAChecked(false);
+    }
+  };
+
+  // Generic handlers
+  const handleChange = (
+    type: SupportedResourceTypes | 'Tag',
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    // SA-0-name || SA-0-tagName-0 || SA-0-tagValue-0
+    const index = Number(event.target.id.split('-')[1]);
+    const property = event.target.id.split('-')[2];
+
+    if (type === 'SA') {
+      const updatedSAs = [...SAs];
+      updatedSAs[index]['index'] = index;
+      updatedSAs[index]['name'] = event.target.value;
+      setSAs(updatedSAs);
+    }
+
+    if (type === 'Tag') {
+      const belongsTo = event.target.id.split('-')[0];
+      const tagIndex = Number(event.target.id.split('-')[3]);
+      const updatedTagList = tags[`${belongsTo}-${index}`]; // [{name:'', value:''}, ...]
+      if (property === 'tagName') {
+        updatedTagList[tagIndex]['name'] = event.target.value;
+      } else if (property === 'tagValue') {
+        updatedTagList[tagIndex]['value'] = event.target.value;
+      }
+
+      setTags((prevState: any) => ({
+        ...prevState,
+        [`${belongsTo}-${index}`]: updatedTagList
+      }));
+    }
+  };
+  const handleCheck = (type: SupportedResourceTypes) => {
+    if (type === 'SA') {
+      if (!SAChecked) {
+        setSAChecked(true);
+        addSA(0);
+      } else {
+        setSAChecked(false);
+        setSAs([]);
+        setTags({});
+      }
+    }
+  };
+
   return (
     <div>
       <Alert
@@ -37,7 +160,7 @@ export const NewTemplatePage: React.FC = () => {
         style={{
           marginTop: 50,
           margin: 'auto',
-          width: '70%',
+          width: '90%',
           fontSize: 22
         }}
       >
@@ -93,13 +216,18 @@ export const NewTemplatePage: React.FC = () => {
                             placeholder="Enter a tag value..."
                           />
                         </Col>
+                        <Col>
+                          <ButtonGroup>
+                            <CustomButton color="primary" outline>
+                              + Another set
+                            </CustomButton>
+                            <CustomButton color="primary" outline>
+                              - This set
+                            </CustomButton>
+                          </ButtonGroup>
+                        </Col>
                       </Row>
                     </FormGroup>
-                    <div>
-                      <CustomButton color="primary" outline>
-                        + Add another set
-                      </CustomButton>
-                    </div>
                   </Row>
                 </Col>
               </Row>
@@ -114,57 +242,28 @@ export const NewTemplatePage: React.FC = () => {
             <Row>
               <Row>
                 <FormGroup>
-                  <Input type="checkbox" checked />{' '}
+                  <Input
+                    type="checkbox"
+                    onChange={() => handleCheck('SA')}
+                    checked={SAChecked}
+                  />{' '}
                   <Label check className="h4">
                     Do you need a Storage Account?
                   </Label>
                 </FormGroup>
               </Row>
-              <Row>
-                <Col>
-                  <FormGroup>
-                    <Label className="h5">
-                      <span style={{ color: 'red' }}>*</span> Name
-                    </Label>
-                    <Input id="sa1" name="sa1" placeholder="Enter a name..." />
-                  </FormGroup>
-                </Col>
-                <Col>
-                  <Row>
-                    <FormGroup>
-                      <Row>
-                        <Label className="h5">
-                          Additional tags for this resource
-                        </Label>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <Input
-                            id="tagName1"
-                            name="tagName1"
-                            placeholder="Enter tag name..."
-                          />
-                        </Col>
-                        <Col>
-                          <Input
-                            id="tagValue1"
-                            name="tagValue1"
-                            placeholder="Enter a tag value..."
-                          />
-                        </Col>
-                      </Row>
-                    </FormGroup>
-                    <div>
-                      <CustomButton color="primary" outline>
-                        + Add another set
-                      </CustomButton>
-                    </div>
-                  </Row>
-                </Col>
-              </Row>
-              <div className="text-center mt-4 mb-4">
-                <CustomButton color="primary">+ Add another</CustomButton>
-              </div>
+              <ResourceInputs
+                resourceType="SA"
+                resourceNeeded={SAChecked}
+                toggleResourceNeeded={handleCheck}
+                resourceList={SAs}
+                handleChange={handleChange}
+                addResource={addSA}
+                removeResource={removeSA}
+                resourceTagGroups={tags}
+                addTagToGroup={addTagToGroup}
+                removeTagFromGroup={removeTagFromGroup}
+              />
             </Row>
 
             <Row>

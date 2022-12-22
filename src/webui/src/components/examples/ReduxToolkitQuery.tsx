@@ -2,7 +2,7 @@ import {
   useFetchCatalogItemsQuery,
   useCreateCatalogItemMutation
 } from '../../hooks/useAPIs';
-import { CustomButton } from '../HOCs/CustomButton';
+import { CustomButton } from '../genericHOCs/CustomButton';
 
 export const ExampleRTKQuery: React.FC = () => {
   // We get these properties for free because we designed this API with RTK

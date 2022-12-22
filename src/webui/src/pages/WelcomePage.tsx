@@ -9,7 +9,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-cards';
 
 import { ThemeColorsContext } from '../context/themeColors';
-import { CustomButton } from '../components/HOCs/CustomButton';
+import { CustomButton } from '../components/genericHOCs/CustomButton';
 import { useCurrentUserActions } from '../hooks/useActions';
 
 // ******************************************************************* //
@@ -33,9 +33,9 @@ const WelcomeMessage: React.FC<WelcomeProps> = (props) => {
   let actionButton = null;
   if (props.isAuthenticated) {
     actionButton = (
-      <CustomButton color="primary" onClick={() => navigate('/examples')}>
+      <CustomButton color="primary" onClick={() => navigate('/newTemplate')}>
         <h3>
-          Get started with examples!{' '}
+          Get started creating a template!{' '}
           <i className="fa-solid fa-arrow-pointer fa-2xs"></i>
         </h3>
       </CustomButton>
@@ -53,12 +53,11 @@ const WelcomeMessage: React.FC<WelcomeProps> = (props) => {
       {/* HACK to force vertical alignment*/}
       <div style={{ paddingTop: 100 }}></div>
       <img src="sas-logo-midnight.png" height={60} alt={'SAS Logo'} />
-      <h1>
-        Welcome to the IRP
-        <br />
-        Team's Demo ReactJS App
-      </h1>
-      <h5>A SAS® prototype for templating new frontend apps</h5>
+      <h1>Welcome to the Dynamic Template Generator</h1>
+      <h5>
+        A SAS® prototype for dynamically generating deployable templates of
+        cloud resources
+      </h5>
       <br />
       <br />
       <br />
@@ -116,8 +115,8 @@ const WelcomeContent: React.FC<WelcomeProps> = (props) => {
             <i className="fa-regular fa-clock fa-4x"></i>
             <br />
             <br />
-            Less time scaffolding out new apps means there's more time for
-            developing features
+            Save a few hundred clicks and by defining the cloud resources you
+            need with a form
           </div>
         </SwiperSlide>
         <SwiperSlide style={slideStyle}>
@@ -125,13 +124,13 @@ const WelcomeContent: React.FC<WelcomeProps> = (props) => {
             <br />
             <br />
             <br />
-            <h3>It provides tons of examples</h3>
+            <h3>It will help determine what you need</h3>
             <br />
             <i className="fa-solid fa-box-open fa-4x"></i>
             <br />
             <br />
-            From using the Context System, to custom Routes protected with RBAC,
-            and much more
+            This app will use the resources you request to determine additional
+            resources that will be needed
           </div>
         </SwiperSlide>
         <SwiperSlide style={slideStyle}>
@@ -139,7 +138,7 @@ const WelcomeContent: React.FC<WelcomeProps> = (props) => {
             <br />
             <br />
             <br />
-            <h3>...And tips for getting the most out of this demo app</h3>
+            <h3>All you have to do is deploy the generated template!</h3>
             <br />
             <i className="fa-regular fa-star fa-4x"></i>
             <br />

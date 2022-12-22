@@ -23,7 +23,7 @@ import {
 } from 'reactstrap';
 import '@fortawesome/fontawesome-free/css/all.css'; // For icons
 
-import { CustomButton } from './HOCs/CustomButton';
+import { CustomButton } from './genericHOCs/CustomButton';
 import { useCurrentUserActions } from '../hooks/useActions';
 import { useCurrentUserIs } from '../hooks/useSelectors';
 
@@ -62,8 +62,8 @@ function renderTabs(props: NavBarProps) {
   if (props.isAuthenticated) {
     return tabInfo.map((tab: TabInfo) => {
       return (
-        <NavItem id={tab.name}>
-          <RouterNavLink id={tab.name} className="nav-link" to={tab.path}>
+        <NavItem key={tab.name}>
+          <RouterNavLink key={tab.name} className="nav-link" to={tab.path}>
             {tab.name}
           </RouterNavLink>
         </NavItem>

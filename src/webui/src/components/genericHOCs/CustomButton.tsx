@@ -15,6 +15,7 @@ interface CustomButtonProps {
   id?: string;
   active?: boolean;
   children?: ReactNode;
+  disabled?: boolean;
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = (props) => {
@@ -26,6 +27,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props) => {
         id={props.id}
         onClick={props.onClick}
         className={props.className}
+        disabled={props.disabled}
       >
         {props.children}
       </Button>
@@ -62,6 +64,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props) => {
       id={props.id}
       onClick={props.onClick}
       className={props.className}
+      disabled={props.disabled}
     >
       {props.children}
     </Button>

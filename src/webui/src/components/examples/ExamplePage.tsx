@@ -20,8 +20,8 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 import '../../styles/basic-swiper.css';
-import { CustomButton } from '../HOCs/CustomButton';
-import { CustomBadge } from '../HOCs/CustomBadge';
+import { CustomButton } from '../genericHOCs/CustomButton';
+import { CustomBadge } from '../genericHOCs/CustomBadge';
 import { hardcodedExampleCarouselItems } from './ExampleCarouselItems';
 
 interface CarouselItem {
