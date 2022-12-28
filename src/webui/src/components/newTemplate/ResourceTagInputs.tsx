@@ -1,11 +1,11 @@
 import { Row, Col, ButtonGroup, Input } from 'reactstrap';
 
-import { SupportedResourceTypes } from '../../types/Supported';
+import { SupportedResourceTypes } from '../../types/Resources';
 import { CustomButton } from '../genericHOCs/CustomButton';
 import { Tag, ResourceTagGroups, emptyTag } from '../../types/Tag';
 
 interface ResourceTagsProps {
-  resource: SupportedResourceTypes;
+  resourceType: SupportedResourceTypes;
   resourceIndex: number;
   resourceTagGroups: ResourceTagGroups;
   handleChange: Function;
@@ -14,7 +14,7 @@ interface ResourceTagsProps {
 }
 
 export const ResourceTagInputs: React.FC<ResourceTagsProps> = ({
-  resource,
+  resourceType,
   resourceIndex,
   resourceTagGroups,
   handleChange,
@@ -22,7 +22,7 @@ export const ResourceTagInputs: React.FC<ResourceTagsProps> = ({
   removeTagFromGroup
 }) => {
   // {SA-0: [{name: '', value:''}, ...], SA-1: [{name: '', value:''}, ...]}
-  const tagGroupKey = `${resource}-${resourceIndex}`;
+  const tagGroupKey = `${resourceType}-${resourceIndex}`;
   const tagGroupList: Tag[] = resourceTagGroups[`${tagGroupKey}`];
   if (tagGroupList?.length === 0) {
     tagGroupList.push({ ...emptyTag });
@@ -30,11 +30,11 @@ export const ResourceTagInputs: React.FC<ResourceTagsProps> = ({
   return (
     <div>
       {tagGroupList?.map((obj: any, tagIndex: number) => (
-        <Row key={`${resource}-${resourceIndex}-tagName-${tagIndex}`}>
+        <Row key={`${resourceType}-${resourceIndex}-tagName-${tagIndex}`}>
           <Col>
             <Input
-              id={`${resource}-${resourceIndex}-tagName-${tagIndex}`}
-              name={`${resource}-${resourceIndex}-tagName-${tagIndex}`}
+              id={`${resourceType}-${resourceIndex}-tagName-${tagIndex}`}
+              name={`${resourceType}-${resourceIndex}-tagName-${tagIndex}`}
               type="text"
               placeholder="Enter a tag name..."
               value={tagGroupList[tagIndex].name}
@@ -43,8 +43,8 @@ export const ResourceTagInputs: React.FC<ResourceTagsProps> = ({
           </Col>
           <Col>
             <Input
-              id={`${resource}-${resourceIndex}-tagValue-${tagIndex}`}
-              name={`${resource}-${resourceIndex}-tagValue-${tagIndex}`}
+              id={`${resourceType}-${resourceIndex}-tagValue-${tagIndex}`}
+              name={`${resourceType}-${resourceIndex}-tagValue-${tagIndex}`}
               type="text"
               placeholder="Enter a tag value..."
               value={tagGroupList[tagIndex].value}
@@ -52,27 +52,31 @@ export const ResourceTagInputs: React.FC<ResourceTagsProps> = ({
             />
           </Col>
           <Col>
-            <ButtonGroup>
-              <CustomButton
-                color="primary"
-                outline
-                onClick={() => addTagToGroup(resource, resourceIndex)}
-              >
-                + Another set
-              </CustomButton>
-              <CustomButton
-                color="primary"
-                outline
-                onClick={() =>
-                  removeTagFromGroup(resource, resourceIndex, tagIndex)
-                }
-              >
-                - This set
-              </CustomButton>
-            </ButtonGroup>
+            <CustomButton
+              color="primary"
+              outline
+              onClick={() =>
+                removeTagFromGroup(resourceType, resourceIndex, tagIndex)
+              }
+            >
+              -
+            </CustomButton>
           </Col>
         </Row>
       ))}
+      <CustomButton
+        color="primary"
+        outline
+        disabled={
+          true
+            ? tagGroupList[tagGroupList.length - 1].name === '' ||
+              tagGroupList[tagGroupList.length - 1].value === ''
+            : false
+        }
+        onClick={() => addTagToGroup(resourceType, resourceIndex)}
+      >
+        +
+      </CustomButton>
     </div>
   );
 };

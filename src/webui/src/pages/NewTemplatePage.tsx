@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
-import {
-  Alert,
-  Row,
-  Col,
-  Form,
-  FormGroup,
-  Input,
-  Label,
-  ButtonGroup
-} from 'reactstrap';
+import { Alert, Row, Col, Form, FormGroup, Input, Label } from 'reactstrap';
 
 import { CustomButton } from '../components/genericHOCs/CustomButton';
-import { SupportedResourceTypes } from '../types/Supported';
 import { Tag, ResourceTagGroups, emptyTag } from '../types/Tag';
-import { StorageAccount } from '../types/StorageAccount';
+import {
+  SupportedResourceTypes,
+  StorageAccount,
+  Application,
+  Database
+} from '../types/Resources';
 import { ResourceInputs } from '../components/newTemplate/ResourceInputs';
 import { ResourceTagInputs } from '../components/newTemplate/ResourceTagInputs';
-import { KeyObject } from 'crypto';
 
 // This component handles all state for the form
 // Reusable componentry exists in stateless form in ../components/newTemplate
@@ -26,18 +20,20 @@ export const NewTemplatePage: React.FC = () => {
 
   // What resource types are requested for progressive disclosure
   const [SAChecked, setSAChecked] = useState(false);
+  const [FAChecked, setFAChecked] = useState(false);
+  const [APSChecked, setAPSChecked] = useState(false);
+  const [PGChecked, setPGChecked] = useState(false);
 
   // The input values for each resource type
   const [SAs, setSAs] = useState<StorageAccount[]>([]);
+  const [FAs, setFAs] = useState<Application[]>([]);
+  const [APSs, setAPSs] = useState<Application[]>([]);
+  const [PGs, setPGs] = useState<Database[]>([]);
 
   // List of tags keyed by which resource they belong to
-  // {ALL-0: [{name: '', value:''}, ...], SA-0: [{name: '', value:''}, ...], SA-1: [{name: '', value:''}, ...]}
   const [tags, setTags] = useState<ResourceTagGroups>({
     [`ALL-0`]: [{ ...emptyTag }]
   });
-
-  //console.log(SAs);
-  //console.log(tags);
 
   // Resource tag handlers
   const addTagGroup = (type: SupportedResourceTypes, resourceIndex: number) => {
@@ -106,7 +102,6 @@ export const NewTemplatePage: React.FC = () => {
     addTagGroup('SA', resourceIndex);
   };
   const removeSA = (indexToRemove: number) => {
-    //setSAs([...SAs.filter((_: any, index: any) => index !== indexToRemove)]);
     const updatedSAs = [...SAs];
     updatedSAs[indexToRemove]['visible'] = false;
     setSAs(updatedSAs);
@@ -117,6 +112,141 @@ export const NewTemplatePage: React.FC = () => {
       setSAChecked(false);
     }
   };
+  const addFA = (resourceIndex: number) => {
+    setFAs([
+      ...FAs,
+      {
+        index: resourceIndex,
+        visible: true,
+        name: '',
+        tags: [],
+        platform: 'DotNet 7',
+        skuName: 'B1',
+        appInsights: true
+      }
+    ]);
+    addTagGroup('FA', resourceIndex);
+  };
+  const removeFA = (indexToRemove: number) => {
+    const updatedFAs = [...FAs];
+    updatedFAs[indexToRemove]['visible'] = false;
+    setFAs(updatedFAs);
+    removeTagGroup('FA', indexToRemove);
+    // If we're executing this on the last item then the length will be 1 until
+    // after this function is done executing
+    if (FAs.length <= 1) {
+      setFAChecked(false);
+    }
+  };
+  const addAPS = (resourceIndex: number) => {
+    setAPSs([
+      ...APSs,
+      {
+        index: resourceIndex,
+        visible: true,
+        name: '',
+        tags: [],
+        platform: 'Node 18',
+        skuName: 'B1',
+        appInsights: true
+      }
+    ]);
+    addTagGroup('APS', resourceIndex);
+  };
+  const removeAPS = (indexToRemove: number) => {
+    const updatedAPSs = [...APSs];
+    updatedAPSs[indexToRemove]['visible'] = false;
+    setAPSs(updatedAPSs);
+    removeTagGroup('APS', indexToRemove);
+    // If we're executing this on the last item then the length will be 1 until
+    // after this function is done executing
+    if (APSs.length <= 1) {
+      setAPSChecked(false);
+    }
+  };
+  const addPG = (resourceIndex: number) => {
+    setPGs([
+      ...PGs,
+      {
+        index: resourceIndex,
+        visible: true,
+        name: '',
+        tags: [],
+        databaseNames: { [`PG-${resourceIndex}-dbName-0`]: '' },
+        firewallRules: {
+          [`PG-${resourceIndex}-fwRule-0`]: {
+            name: '',
+            startIpAddress: '',
+            endIpAddress: ''
+          }
+        }
+      }
+    ]);
+    addTagGroup('PG', resourceIndex);
+  };
+  const removePG = (indexToRemove: number) => {
+    const updatedPGs = [...PGs];
+    updatedPGs[indexToRemove]['visible'] = false;
+    setPGs(updatedPGs);
+    removeTagGroup('APS', indexToRemove);
+    // If we're executing this on the last item then the length will be 1 until
+    // after this function is done executing
+    if (PGs.length <= 1) {
+      setPGChecked(false);
+    }
+  };
+  const addDBToPG = (resourceIndex: number) => {
+    const updatedPGs = [...PGs];
+    const keys = Object.keys(updatedPGs[resourceIndex]['databaseNames']);
+    let dbNameIndex = 0;
+    if (keys.length > 0) {
+      const lastKey = keys[keys.length - 1];
+      dbNameIndex = Number(lastKey.split('-')[3]);
+    }
+    updatedPGs[resourceIndex]['databaseNames'][
+      `PG-${resourceIndex}-dbName-${dbNameIndex + 1}`
+    ] = '';
+    setPGs(updatedPGs);
+  };
+  const removeDBFromPG = (resourceIndex: number, dbNameIndex: number) => {
+    const updatedPGs = [...PGs];
+    const {
+      [`PG-${resourceIndex}-dbName-${dbNameIndex}`]: dbNameToRemove,
+      ...rest
+    } = {
+      ...updatedPGs[resourceIndex]['databaseNames']
+    };
+    updatedPGs[resourceIndex]['databaseNames'] = rest;
+    setPGs(updatedPGs);
+  };
+  const addFWRuleToPG = (resourceIndex: number) => {
+    const updatedPGs = [...PGs];
+    const keys = Object.keys(updatedPGs[resourceIndex]['firewallRules']);
+    let fwRuleIndex = 0;
+    if (keys.length > 0) {
+      const lastKey = keys[keys.length - 1];
+      fwRuleIndex = Number(lastKey.split('-')[3]);
+    }
+    updatedPGs[resourceIndex]['firewallRules'][
+      `PG-${resourceIndex}-fwRule-${fwRuleIndex + 1}`
+    ] = {
+      name: '',
+      startIpAddress: '',
+      endIpAddress: ''
+    };
+    setPGs(updatedPGs);
+  };
+  const removeFWRuleFromPG = (resourceIndex: number, fwRuleIndex: number) => {
+    const updatedPGs = [...PGs];
+    const {
+      [`PG-${resourceIndex}-fwRule-${fwRuleIndex}`]: fwRuleToRemove,
+      ...rest
+    } = {
+      ...updatedPGs[resourceIndex]['firewallRules']
+    };
+    updatedPGs[resourceIndex]['firewallRules'] = rest;
+    setPGs(updatedPGs);
+  };
 
   // Generic handlers
   const handleChange = (
@@ -124,23 +254,85 @@ export const NewTemplatePage: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     // SA-0-name || SA-0-tagName-0 || SA-0-tagValue-0
+    const belongsTo = event.target.id.split('-')[0];
     const index = Number(event.target.id.split('-')[1]);
-    const property = event.target.id.split('-')[2];
+    const input = event.target.id.split('-')[2];
+    const { target } = event;
+    const { value } = target;
 
     if (type === 'SA') {
       const updatedSAs = [...SAs];
       updatedSAs[index]['index'] = index;
-      updatedSAs[index]['name'] = event.target.value;
+      updatedSAs[index]['name'] = value;
       setSAs(updatedSAs);
     }
 
+    if (type === 'FA') {
+      const updatedFAs = [...FAs];
+      updatedFAs[index]['index'] = index;
+      if (input === 'name') {
+        updatedFAs[index]['name'] = value;
+      } else if (input === 'platform') {
+        updatedFAs[index]['platform'] = value;
+      } else if (input === 'sku') {
+        updatedFAs[index]['skuName'] = value;
+      } else if (input === 'monitor') {
+        updatedFAs[index]['appInsights'] = !updatedFAs[index]['appInsights'];
+      }
+      setFAs(updatedFAs);
+    }
+
+    if (type === 'APS') {
+      const updatedAPSs = [...APSs];
+      updatedAPSs[index]['index'] = index;
+      if (input === 'name') {
+        updatedAPSs[index]['name'] = value;
+      } else if (input === 'platform') {
+        updatedAPSs[index]['platform'] = value;
+      } else if (input === 'sku') {
+        updatedAPSs[index]['skuName'] = value;
+      } else if (input === 'monitor') {
+        updatedAPSs[index]['appInsights'] = !updatedAPSs[index]['appInsights'];
+      }
+      setAPSs(updatedAPSs);
+    }
+
+    if (type === 'PG') {
+      const updatedPGs = [...PGs];
+      updatedPGs[index]['index'] = index;
+      if (input === 'name') {
+        updatedPGs[index]['name'] = value;
+      } else if (input === 'dbName') {
+        const dbNameIndex = Number(event.target.id.split('-')[3]);
+        updatedPGs[index]['databaseNames'][
+          `PG-${index}-dbName-${dbNameIndex}`
+        ] = event.target.value;
+      } else if (input === 'fwRule') {
+        const fwRuleIndex = Number(event.target.id.split('-')[3]);
+        const ruleProperty = event.target.id.split('-')[4];
+        if (ruleProperty === 'name') {
+          updatedPGs[index]['firewallRules'][
+            `PG-${index}-fwRule-${fwRuleIndex}`
+          ].name = event.target.value;
+        } else if (ruleProperty === 'startIP') {
+          updatedPGs[index]['firewallRules'][
+            `PG-${index}-fwRule-${fwRuleIndex}`
+          ].startIpAddress = event.target.value;
+        } else if (ruleProperty === 'endIP') {
+          updatedPGs[index]['firewallRules'][
+            `PG-${index}-fwRule-${fwRuleIndex}`
+          ].endIpAddress = event.target.value;
+        }
+      }
+      setPGs(updatedPGs);
+    }
+
     if (type === 'Tag') {
-      const belongsTo = event.target.id.split('-')[0];
       const tagIndex = Number(event.target.id.split('-')[3]);
       const updatedTagList = tags[`${belongsTo}-${index}`]; // [{name:'', value:''}, ...]
-      if (property === 'tagName') {
+      if (input === 'tagName') {
         updatedTagList[tagIndex]['name'] = event.target.value;
-      } else if (property === 'tagValue') {
+      } else if (input === 'tagValue') {
         updatedTagList[tagIndex]['value'] = event.target.value;
       }
 
@@ -161,6 +353,132 @@ export const NewTemplatePage: React.FC = () => {
         removeTagGroup('SA', 0, true);
       }
     }
+
+    if (type === 'FA') {
+      if (!FAChecked) {
+        setFAChecked(true);
+        addFA(0);
+      } else if (FAChecked) {
+        setFAChecked(false);
+        setFAs([]);
+        removeTagGroup('FA', 0, true);
+      }
+    }
+
+    if (type === 'APS') {
+      if (!APSChecked) {
+        setAPSChecked(true);
+        addAPS(0);
+      } else if (APSChecked) {
+        setAPSChecked(false);
+        setAPSs([]);
+        removeTagGroup('APS', 0, true);
+      }
+    }
+
+    if (type === 'PG') {
+      if (!PGChecked) {
+        setPGChecked(true);
+        addPG(0);
+      } else if (PGChecked) {
+        setPGChecked(false);
+        setPGs([]);
+        removeTagGroup('PG', 0, true);
+      }
+    }
+  };
+  const clearInputs = () => {
+    setCloudProvider('Azure');
+    setSAChecked(false);
+    setSAs([]);
+    setFAChecked(false);
+    setFAs([]);
+    setAPSChecked(false);
+    setAPSs([]);
+    setPGChecked(false);
+    setPGs([]);
+    setTags({ [`ALL-0`]: [{ ...emptyTag }] });
+  };
+  const submitForm = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // We don't want the enter key to submit our form
+    event.preventDefault();
+    let resourceType = '';
+    let tagIndex = 0;
+
+    for (const [key, value] of Object.entries(tags)) {
+      resourceType = key.split('-')[0]; //SA
+      tagIndex = Number(key.split('-')[1]); //0
+
+      if (resourceType === 'SA') {
+        SAs.forEach((SA: StorageAccount, index: number) => {
+          if (index === tagIndex) {
+            value.forEach((tag: Tag) => {
+              SA.tags.push(tag);
+            });
+          }
+        });
+      }
+
+      if (resourceType === 'FA') {
+        FAs.forEach((FA: Application, index: number) => {
+          if (index === tagIndex) {
+            value.forEach((tag: Tag) => {
+              FA.tags.push(tag);
+            });
+          }
+        });
+      }
+
+      if (resourceType === 'APS') {
+        APSs.forEach((APS: Application, index: number) => {
+          if (index === tagIndex) {
+            value.forEach((tag: Tag) => {
+              APS.tags.push(tag);
+            });
+          }
+        });
+      }
+
+      if (resourceType === 'PG') {
+        PGs.forEach((PG: Database, index: number) => {
+          if (index === tagIndex) {
+            value.forEach((tag: Tag) => {
+              PG.tags.push(tag);
+            });
+          }
+        });
+      }
+
+      if (resourceType === 'ALL') {
+        SAs.forEach((SA: StorageAccount) => {
+          value.forEach((tag: Tag) => {
+            SA.tags.push(tag);
+          });
+        });
+
+        FAs.forEach((FA: Application) => {
+          value.forEach((tag: Tag) => {
+            FA.tags.push(tag);
+          });
+        });
+
+        APSs.forEach((APS: Application) => {
+          value.forEach((tag: Tag) => {
+            APS.tags.push(tag);
+          });
+        });
+
+        PGs.forEach((PG: Database) => {
+          value.forEach((tag: Tag) => {
+            PG.tags.push(tag);
+          });
+        });
+      }
+    }
+
+    // Call factory to define resources
+
+    clearInputs();
   };
 
   return (
@@ -214,7 +532,7 @@ export const NewTemplatePage: React.FC = () => {
                         <Label className="h4">Resource tags</Label>
                       </Row>
                       <ResourceTagInputs
-                        resource="ALL"
+                        resourceType="ALL"
                         resourceIndex={0}
                         resourceTagGroups={tags}
                         addTagToGroup={addTagToGroup}
@@ -260,13 +578,13 @@ export const NewTemplatePage: React.FC = () => {
               />
             </Row>
 
-            {/* <Row>
+            <Row>
               <Row>
                 <FormGroup>
                   <Input
                     type="checkbox"
-                    onChange={() => handleCheck('SA')}
-                    checked={SAChecked}
+                    onChange={() => handleCheck('FA')}
+                    checked={FAChecked}
                   />{' '}
                   <Label check className="h4">
                     Do you need a Function App?
@@ -274,13 +592,13 @@ export const NewTemplatePage: React.FC = () => {
                 </FormGroup>
               </Row>
               <ResourceInputs
-                resourceType="SA"
-                resourceNeeded={SAChecked}
+                resourceType="FA"
+                resourceNeeded={FAChecked}
                 toggleResourceNeeded={handleCheck}
-                resourceList={SAs}
+                resourceList={FAs}
                 handleChange={handleChange}
-                addResource={addSA}
-                removeResource={removeSA}
+                addResource={addFA}
+                removeResource={removeFA}
                 resourceTagGroups={tags}
                 addTagToGroup={addTagToGroup}
                 removeTagFromGroup={removeTagFromGroup}
@@ -292,8 +610,8 @@ export const NewTemplatePage: React.FC = () => {
                 <FormGroup>
                   <Input
                     type="checkbox"
-                    onChange={() => handleCheck('SA')}
-                    checked={SAChecked}
+                    onChange={() => handleCheck('APS')}
+                    checked={APSChecked}
                   />{' '}
                   <Label check className="h4">
                     Do you need an App Service?
@@ -301,13 +619,13 @@ export const NewTemplatePage: React.FC = () => {
                 </FormGroup>
               </Row>
               <ResourceInputs
-                resourceType="SA"
-                resourceNeeded={SAChecked}
+                resourceType="APS"
+                resourceNeeded={APSChecked}
                 toggleResourceNeeded={handleCheck}
-                resourceList={SAs}
+                resourceList={APSs}
                 handleChange={handleChange}
-                addResource={addSA}
-                removeResource={removeSA}
+                addResource={addAPS}
+                removeResource={removeAPS}
                 resourceTagGroups={tags}
                 addTagToGroup={addTagToGroup}
                 removeTagFromGroup={removeTagFromGroup}
@@ -319,8 +637,8 @@ export const NewTemplatePage: React.FC = () => {
                 <FormGroup>
                   <Input
                     type="checkbox"
-                    onChange={() => handleCheck('SA')}
-                    checked={SAChecked}
+                    onChange={() => handleCheck('PG')}
+                    checked={PGChecked}
                   />{' '}
                   <Label check className="h4">
                     Do you need a PostgreSQL instance?
@@ -328,27 +646,31 @@ export const NewTemplatePage: React.FC = () => {
                 </FormGroup>
               </Row>
               <ResourceInputs
-                resourceType="SA"
-                resourceNeeded={SAChecked}
+                resourceType="PG"
+                resourceNeeded={PGChecked}
                 toggleResourceNeeded={handleCheck}
-                resourceList={SAs}
+                resourceList={PGs}
                 handleChange={handleChange}
-                addResource={addSA}
-                removeResource={removeSA}
+                addResource={addPG}
+                removeResource={removePG}
                 resourceTagGroups={tags}
                 addTagToGroup={addTagToGroup}
                 removeTagFromGroup={removeTagFromGroup}
+                addDBToPG={addDBToPG}
+                removeDBFromPG={removeDBFromPG}
+                addFWRuleToPG={addFWRuleToPG}
+                removeFWRuleFromPG={removeFWRuleFromPG}
               />
-            </Row> */}
+            </Row>
           </Form>
           <br />
           <CustomButton
             color="primary"
             // Create a little spacing between the two buttons
             className="me-2"
-            // onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
-            //   submitForm(event)
-            // }
+            onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
+              submitForm(event)
+            }
           >
             Submit
           </CustomButton>

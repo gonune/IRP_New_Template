@@ -1,22 +1,31 @@
 import { Row, Col, FormGroup, Input, Label } from 'reactstrap';
 
 import { CustomButton } from '../genericHOCs/CustomButton';
-import { SupportedResourceTypes } from '../../types/Supported';
 import { ResourceTagGroups } from '../../types/Tag';
-import { StorageAccount } from '../../types/StorageAccount';
+import {
+  SupportedResourceTypes,
+  StorageAccount,
+  Application
+} from '../../types/Resources';
 import { ResourceTagInputs } from './ResourceTagInputs';
+import { ApplicationInputs } from './ApplicationInputs';
+import { DatabaseInputs } from './DatabaseInputs';
 
 interface ResourceInputsProps {
   resourceType: SupportedResourceTypes;
   resourceNeeded: boolean;
   toggleResourceNeeded: Function;
-  resourceList: StorageAccount[]; // OR other kinds as support increases
+  resourceList: StorageAccount[] | Application[];
   handleChange: Function;
   addResource: Function;
   removeResource: Function;
   resourceTagGroups: ResourceTagGroups;
   addTagToGroup: Function;
   removeTagFromGroup: Function;
+  addDBToPG?: Function;
+  removeDBFromPG?: Function;
+  addFWRuleToPG?: Function;
+  removeFWRuleFromPG?: Function;
 }
 
 export const ResourceInputs: React.FC<ResourceInputsProps> = ({
@@ -29,7 +38,11 @@ export const ResourceInputs: React.FC<ResourceInputsProps> = ({
   removeResource,
   resourceTagGroups,
   addTagToGroup,
-  removeTagFromGroup
+  removeTagFromGroup,
+  addDBToPG,
+  removeDBFromPG,
+  addFWRuleToPG,
+  removeFWRuleFromPG
 }) => {
   type Resource = typeof resourceList[0];
 
@@ -77,7 +90,7 @@ export const ResourceInputs: React.FC<ResourceInputsProps> = ({
                       </Label>
                     </Row>
                     <ResourceTagInputs
-                      resource={resourceType}
+                      resourceType={resourceType}
                       resourceIndex={index}
                       resourceTagGroups={resourceTagGroups}
                       handleChange={handleChange}
@@ -87,13 +100,34 @@ export const ResourceInputs: React.FC<ResourceInputsProps> = ({
                   </FormGroup>
                 </Row>
               </Col>
+              <ApplicationInputs
+                resourceType={resourceType}
+                resourceList={resourceList}
+                resourceIndex={index}
+                handleChange={handleChange}
+              />
+              <DatabaseInputs
+                resourceType={resourceType}
+                resourceList={resourceList}
+                resourceIndex={index}
+                handleChange={handleChange}
+                addDBToPG={addDBToPG}
+                removeDBFromPG={removeDBFromPG}
+                addFWRuleToPG={addFWRuleToPG}
+                removeFWRuleFromPG={removeFWRuleFromPG}
+              />
               <div className="text-center mt-4 mb-4">
                 <CustomButton
                   id={`${resourceType}-${index}-addResourceBtn`}
                   color="primary"
                   onClick={() => addResource(resourceList.length)}
                   className="me-2"
-                  disabled={lastVisibleIndex === index ? false : true}
+                  disabled={
+                    lastVisibleIndex === index &&
+                    resourceList[index].name !== ''
+                      ? false
+                      : true
+                  }
                 >
                   + Add another
                 </CustomButton>
