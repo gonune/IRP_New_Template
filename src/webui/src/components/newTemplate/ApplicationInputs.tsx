@@ -15,9 +15,7 @@ export const ApplicationInputs: React.FC<ApplicationInputsProps> = ({
   resourceIndex,
   handleChange
 }) => {
-  if (resourceType !== 'FA' || 'APS') {
-    return null;
-  } else {
+  if (resourceType === 'FA' || resourceType === 'APS') {
     return (
       <Row>
         <Col>
@@ -88,5 +86,7 @@ export const ApplicationInputs: React.FC<ApplicationInputsProps> = ({
         </Col>
       </Row>
     );
+  } else {
+    return null;
   }
 };

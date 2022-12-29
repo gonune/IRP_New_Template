@@ -7,10 +7,14 @@ import {
   SupportedResourceTypes,
   StorageAccount,
   Application,
+  isASupportedApplicationSku,
+  isASupportedPlatform,
   Database
 } from '../types/Resources';
 import { ResourceInputs } from '../components/newTemplate/ResourceInputs';
 import { ResourceTagInputs } from '../components/newTemplate/ResourceTagInputs';
+import { defineResources } from '../util/generateResourceDefinitions';
+import { ResultModal } from '../components/submitTemplate/ResultModal';
 
 // This component handles all state for the form
 // Reusable componentry exists in stateless form in ../components/newTemplate
@@ -34,6 +38,11 @@ export const NewTemplatePage: React.FC = () => {
   const [tags, setTags] = useState<ResourceTagGroups>({
     [`ALL-0`]: [{ ...emptyTag }]
   });
+
+  // Results
+  const [modal, setModal] = useState(false);
+  const toggleModal = () => setModal(!modal);
+  const [results, setResults] = useState<any>(null);
 
   // Resource tag handlers
   const addTagGroup = (type: SupportedResourceTypes, resourceIndex: number) => {
@@ -272,9 +281,9 @@ export const NewTemplatePage: React.FC = () => {
       updatedFAs[index]['index'] = index;
       if (input === 'name') {
         updatedFAs[index]['name'] = value;
-      } else if (input === 'platform') {
+      } else if (input === 'platform' && isASupportedPlatform(value)) {
         updatedFAs[index]['platform'] = value;
-      } else if (input === 'sku') {
+      } else if (input === 'sku' && isASupportedApplicationSku(value)) {
         updatedFAs[index]['skuName'] = value;
       } else if (input === 'monitor') {
         updatedFAs[index]['appInsights'] = !updatedFAs[index]['appInsights'];
@@ -287,9 +296,9 @@ export const NewTemplatePage: React.FC = () => {
       updatedAPSs[index]['index'] = index;
       if (input === 'name') {
         updatedAPSs[index]['name'] = value;
-      } else if (input === 'platform') {
+      } else if (input === 'platform' && isASupportedPlatform(value)) {
         updatedAPSs[index]['platform'] = value;
-      } else if (input === 'sku') {
+      } else if (input === 'sku' && isASupportedApplicationSku(value)) {
         updatedAPSs[index]['skuName'] = value;
       } else if (input === 'monitor') {
         updatedAPSs[index]['appInsights'] = !updatedAPSs[index]['appInsights'];
@@ -402,81 +411,11 @@ export const NewTemplatePage: React.FC = () => {
   const submitForm = (event: React.MouseEvent<HTMLButtonElement>) => {
     // We don't want the enter key to submit our form
     event.preventDefault();
-    let resourceType = '';
-    let tagIndex = 0;
-
-    for (const [key, value] of Object.entries(tags)) {
-      resourceType = key.split('-')[0]; //SA
-      tagIndex = Number(key.split('-')[1]); //0
-
-      if (resourceType === 'SA') {
-        SAs.forEach((SA: StorageAccount, index: number) => {
-          if (index === tagIndex) {
-            value.forEach((tag: Tag) => {
-              SA.tags.push(tag);
-            });
-          }
-        });
-      }
-
-      if (resourceType === 'FA') {
-        FAs.forEach((FA: Application, index: number) => {
-          if (index === tagIndex) {
-            value.forEach((tag: Tag) => {
-              FA.tags.push(tag);
-            });
-          }
-        });
-      }
-
-      if (resourceType === 'APS') {
-        APSs.forEach((APS: Application, index: number) => {
-          if (index === tagIndex) {
-            value.forEach((tag: Tag) => {
-              APS.tags.push(tag);
-            });
-          }
-        });
-      }
-
-      if (resourceType === 'PG') {
-        PGs.forEach((PG: Database, index: number) => {
-          if (index === tagIndex) {
-            value.forEach((tag: Tag) => {
-              PG.tags.push(tag);
-            });
-          }
-        });
-      }
-
-      if (resourceType === 'ALL') {
-        SAs.forEach((SA: StorageAccount) => {
-          value.forEach((tag: Tag) => {
-            SA.tags.push(tag);
-          });
-        });
-
-        FAs.forEach((FA: Application) => {
-          value.forEach((tag: Tag) => {
-            FA.tags.push(tag);
-          });
-        });
-
-        APSs.forEach((APS: Application) => {
-          value.forEach((tag: Tag) => {
-            APS.tags.push(tag);
-          });
-        });
-
-        PGs.forEach((PG: Database) => {
-          value.forEach((tag: Tag) => {
-            PG.tags.push(tag);
-          });
-        });
-      }
-    }
 
     // Call factory to define resources
+    const response = defineResources({ tags, SAs, FAs, APSs, PGs });
+    setResults(response);
+    toggleModal();
 
     clearInputs();
   };
@@ -674,9 +613,12 @@ export const NewTemplatePage: React.FC = () => {
           >
             Submit
           </CustomButton>
-          <CustomButton color="secondary">Clear form inputs</CustomButton>
+          <CustomButton color="secondary" onClick={clearInputs}>
+            Clear form inputs
+          </CustomButton>
         </div>
       </Alert>
+      <ResultModal modal={modal} toggleModal={toggleModal} contents={results} />
     </div>
   );
 };

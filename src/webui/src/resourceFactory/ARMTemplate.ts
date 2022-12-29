@@ -124,7 +124,6 @@ export class ARMTemplate {
       outputs: this.outputs
     };
 
-    console.log(`${JSON.stringify(result)}`);
     return result;
   }
 }
