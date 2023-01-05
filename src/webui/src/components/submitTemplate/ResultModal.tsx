@@ -17,6 +17,7 @@ import { Buffer } from 'buffer';
 import { CustomButton } from '../genericHOCs/CustomButton';
 import { uploadToGitHubViaApi } from '../../util/uploadToGitHub';
 import { GitHubInputs } from './GitHubInputs';
+import { JsonTypes } from '@azure/msal-common/dist/utils/Constants';
 
 interface ResultModalProps {
   modal: boolean;
@@ -28,21 +29,24 @@ interface ResponseMessageProps {
   loadingFlag: boolean;
   status: number;
   message: string;
+  contents: string;
   downloadFile: Function;
 }
 
 interface DownloadLinkProps {
   responseStatus: number;
+  contentsStr: string;
   downloadFile: Function;
 }
 
 const DownloadLink: React.FC<DownloadLinkProps> = ({
   responseStatus,
+  contentsStr,
   downloadFile
 }) => {
   if (responseStatus === 201) {
     return (
-      <CustomButton color="link" onClick={() => downloadFile()}>
+      <CustomButton color="link" onClick={() => downloadFile(contentsStr)}>
         Local download (optional)
       </CustomButton>
     );
@@ -55,6 +59,7 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
   loadingFlag,
   status,
   message,
+  contents,
   downloadFile
 }) => {
   if (status === 0 && loadingFlag) {
@@ -63,7 +68,11 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
     return (
       <Alert color="primary">
         {message}
-        <DownloadLink responseStatus={status} downloadFile={downloadFile} />
+        <DownloadLink
+          responseStatus={status}
+          contentsStr={contents}
+          downloadFile={downloadFile}
+        />
       </Alert>
     );
   } else if (status !== 0) {
@@ -269,6 +278,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
           loadingFlag={response.loading}
           status={response.status}
           message={response.message}
+          contents={JSON.stringify(contents)}
           downloadFile={handleDownload}
         />
       </ModalBody>
