@@ -72,7 +72,6 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
   const [tags, setTags] = useState<ResourceTagGroups>({
     [`ALL-0`]: [{ ...emptyTag }]
   });
-  console.log(tags);
 
   // Resource tag handlers
   const addTagGroup = (type: SupportedResourceTypes, resourceIndex: number) => {
@@ -501,6 +500,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
     let appInsights = false;
     let databaseNames: string[] = [];
     let fwRules: DatabaseFirewallRule[] = [];
+    let tagsObject: ResourceTagGroups = { [`ALL-0`]: [{ ...emptyTag }] };
 
     function handleApplicationSubResources(resource: any) {
       if (resource.properties.siteConfig.linuxFxVersion === 'DOTNETCORE|7.0') {
@@ -556,11 +556,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           for (const [key, value] of Object.entries(resource.tags)) {
             tagList.push({ name: key, value: value });
           }
-          console.log('SACounter: ', SAcounter, tagList);
-          setTags((prevState: any) => ({
-            ...prevState,
-            [`SA-${SAcounter - 1}`]: tagList
-          }));
+          tagsObject[`SA-${SAcounter}`] = tagList;
         }
 
         SAcounter++;
@@ -577,11 +573,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           for (const [key, value] of Object.entries(resource.tags)) {
             tagList.push({ name: key, value: value });
           }
-          console.log('FACounter: ', FAcounter, tagList);
-          setTags((prevState: any) => ({
-            ...prevState,
-            [`FA-${FAcounter - 1}`]: tagList
-          }));
+          tagsObject[`FA-${FAcounter}`] = tagList;
         }
 
         FAcounter++;
@@ -598,10 +590,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           for (const [key, value] of Object.entries(resource.tags)) {
             tagList.push({ name: key, value: value });
           }
-          setTags((prevState: any) => ({
-            ...prevState,
-            [`APS-${APScounter - 1}`]: tagList
-          }));
+          tagsObject[`APS-${APScounter}`] = tagList;
         }
 
         APScounter++;
@@ -651,16 +640,14 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           for (const [key, value] of Object.entries(resource.tags)) {
             tagList.push({ name: key, value: value });
           }
-          setTags((prevState: any) => ({
-            ...prevState,
-            [`PG-${PGcounter - 1}`]: tagList
-          }));
+          tagsObject[`PG-${PGcounter}`] = tagList;
         }
 
         PGcounter++;
       }
     });
 
+    setTags(tagsObject);
     setOperation('new');
   };
 
