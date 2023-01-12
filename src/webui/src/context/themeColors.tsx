@@ -33,7 +33,7 @@ export const ThemeColorsProvider: React.FC<ContextProps> = ({ children }) => {
     primary: '#22344D',
     secondary: '#6D757D',
     info: '#0378CD',
-    danger: '#FF8A8A'
+    danger: '#b32020'
   };
 
   return (

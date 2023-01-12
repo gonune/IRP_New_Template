@@ -16,6 +16,7 @@ interface CustomButtonProps {
   active?: boolean;
   children?: ReactNode;
   disabled?: boolean;
+  style?: any;
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = (props) => {
@@ -23,6 +24,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props) => {
   if (props.color === 'link') {
     return (
       <Button
+        style={props.style}
         color="link"
         id={props.id}
         onClick={props.onClick}
@@ -56,6 +58,12 @@ export const CustomButton: React.FC<CustomButtonProps> = (props) => {
       borderInlineColor: color,
       color: color
     };
+  }
+
+  if (props.style) {
+    for (const [key, value] of Object.entries(props.style)) {
+      style[`${key}`] = value;
+    }
   }
 
   return (

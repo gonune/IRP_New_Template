@@ -48,7 +48,9 @@ const formatTags = ({ tags, SAs, FAs, APSs, PGs }: defineResources) => {
         if ((type === resourceType && index === tagIndex) || type === 'ALL') {
           value.forEach((tag: Tag) => {
             const updatedTag = flattenKeyStructure(tag);
-            updatedTags.push(updatedTag);
+            if (Object.keys(updatedTag)[0] !== '') {
+              updatedTags.push(updatedTag);
+            }
           });
         }
       }

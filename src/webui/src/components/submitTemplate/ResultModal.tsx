@@ -9,7 +9,8 @@ import {
   Input,
   Label,
   Alert,
-  Spinner
+  Spinner,
+  CloseButton
 } from 'reactstrap';
 import { AxiosError } from 'axios';
 import { Buffer } from 'buffer';
@@ -17,7 +18,6 @@ import { Buffer } from 'buffer';
 import { CustomButton } from '../genericHOCs/CustomButton';
 import { uploadToGitHubViaApi } from '../../util/uploadToGitHub';
 import { GitHubInputs } from './GitHubInputs';
-import { JsonTypes } from '@azure/msal-common/dist/utils/Constants';
 
 interface ResultModalProps {
   modal: boolean;
@@ -31,20 +31,23 @@ interface ResponseMessageProps {
   message: string;
   contents: string;
   downloadFile: Function;
+  githubChecked: boolean;
 }
 
 interface DownloadLinkProps {
   responseStatus: number;
   contentsStr: string;
   downloadFile: Function;
+  githubChecked: boolean;
 }
 
 const DownloadLink: React.FC<DownloadLinkProps> = ({
   responseStatus,
   contentsStr,
-  downloadFile
+  downloadFile,
+  githubChecked
 }) => {
-  if (responseStatus === 201) {
+  if (responseStatus === 201 && githubChecked) {
     return (
       <CustomButton color="link" onClick={() => downloadFile(contentsStr)}>
         Local download (optional)
@@ -60,11 +63,12 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
   status,
   message,
   contents,
-  downloadFile
+  downloadFile,
+  githubChecked
 }) => {
   if (status === 0 && loadingFlag) {
     return <Spinner className="m-auto" color="primary" />;
-  } else if (status === 201 && downloadFile) {
+  } else if (status === 201 && message !== '') {
     return (
       <Alert color="primary">
         {message}
@@ -72,9 +76,12 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
           responseStatus={status}
           contentsStr={contents}
           downloadFile={downloadFile}
+          githubChecked={githubChecked}
         />
       </Alert>
     );
+  } else if (status === 201 && message === '') {
+    return null;
   } else if (status !== 0) {
     return (
       <Alert color="danger">
@@ -116,7 +123,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
     }
   };
 
-  const reset = () => {
+  const handleReset = () => {
     setGithubChecked(false);
     setDownloadChecked(false);
     setRepoOwner('sas-institute-solutions-factory');
@@ -129,7 +136,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
   };
 
   const handleClose = () => {
-    reset();
+    handleReset();
     toggleModal();
   };
   const handleDownload = (contentsStr: string) => {
@@ -139,7 +146,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
     element.download = 'deploy-project.json';
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
-    setResponse((prevState) => ({ ...prevState, [response.status]: 201 }));
+    setResponse((prevState) => ({ ...prevState, status: 201 }));
   };
   const handleProceed = (event: React.MouseEvent<HTMLButtonElement>) => {
     // We don't want the enter key to submit our form
@@ -153,7 +160,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
       // HACK: Need to replace with Github Apps
       const { REACT_APP_GITHUB_PAT } = process.env;
       if (REACT_APP_GITHUB_PAT) {
-        // Reset just the response message and set loading to true
+        // handleReset just the response message and set loading to true
         setResponse({
           loading: true,
           status: 0,
@@ -235,8 +242,14 @@ export const ResultModal: React.FC<ResultModalProps> = ({
   };
 
   return (
-    <Modal isOpen={modal} toggle={toggleModal}>
-      <ModalHeader toggle={toggleModal}>Next steps...</ModalHeader>
+    // backdrop="static" makes it so the user can't click outside of the modal
+    <Modal isOpen={modal} toggle={toggleModal} backdrop="static">
+      <ModalHeader
+        toggle={toggleModal}
+        close={<CloseButton onClick={handleClose} />}
+      >
+        Next steps...
+      </ModalHeader>
       <ModalBody>
         <Form>
           <FormGroup check>
@@ -280,6 +293,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
           message={response.message}
           contents={JSON.stringify(contents)}
           downloadFile={handleDownload}
+          githubChecked={githubChecked}
         />
       </ModalBody>
       <ModalFooter>

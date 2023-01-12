@@ -266,7 +266,12 @@ function AuthNavItem(props: NavBarProps) {
 export const Navigation: React.FC<NavBarProps> = (props) => {
   return (
     <div style={{ paddingBottom: 20 }}>
-      <Navbar color="light" light expand="sm">
+      <Navbar
+        color="light"
+        light
+        expand="sm"
+        style={{ position: 'sticky', top: 0 }}
+      >
         <NavbarBrand href="/">
           <img src="sas-logo-midnight.png" height={40} alt={'SAS Logo'} />
         </NavbarBrand>
