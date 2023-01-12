@@ -23,7 +23,8 @@ export const ResourceTagInputs: React.FC<ResourceTagsProps> = ({
 }) => {
   // {SA-0: [{name: '', value:''}, ...], SA-1: [{name: '', value:''}, ...]}
   const tagGroupKey = `${resourceType}-${resourceIndex}`;
-  const tagGroupList: Tag[] = resourceTagGroups[`${tagGroupKey}`];
+  const tagGroupValue: any = resourceTagGroups[`${tagGroupKey}`];
+  const tagGroupList: Tag[] = tagGroupValue.tagList;
   if (tagGroupList?.length === 0) {
     tagGroupList.push({ ...emptyTag });
   }
@@ -54,6 +55,7 @@ export const ResourceTagInputs: React.FC<ResourceTagsProps> = ({
           <Col>
             <CustomButton
               color="primary"
+              disabled={tagGroupValue.comesFromExisting === true ? true : false}
               outline
               onClick={() =>
                 removeTagFromGroup(resourceType, resourceIndex, tagIndex)

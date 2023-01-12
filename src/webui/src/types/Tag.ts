@@ -4,7 +4,10 @@ export type Tag = {
 };
 
 export type ResourceTagGroups = {
-  [index: string]: Tag[];
+  [index: string]: {
+    comesFromExisting: boolean;
+    tagList: Tag[];
+  };
 };
 
 export const emptyTag = {

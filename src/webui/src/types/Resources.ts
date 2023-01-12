@@ -4,6 +4,7 @@ export type SupportedResourceTypes = 'ALL' | 'SA' | 'FA' | 'APS' | 'PG';
 
 export type Resource = {
   index: number;
+  comesFromExisting: boolean;
   visible: boolean;
   name: string;
   tags: Tag[];

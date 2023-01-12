@@ -134,6 +134,11 @@ export const ResourceInputs: React.FC<ResourceInputsProps> = ({
                 <CustomButton
                   id={`${resourceType}-${index}-removeResourceBtn`}
                   color="secondary"
+                  disabled={
+                    resourceList[index].comesFromExisting === true
+                      ? true
+                      : false
+                  }
                   onClick={() => {
                     removeResource(index);
                     // At the time this runs there will be one left in the list,

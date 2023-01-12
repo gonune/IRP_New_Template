@@ -70,14 +70,20 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
 
   // List of tags keyed by which resource they belong to
   const [tags, setTags] = useState<ResourceTagGroups>({
-    [`ALL-0`]: [{ ...emptyTag }]
+    [`ALL-0`]: {
+      comesFromExisting: false,
+      tagList: [{ ...emptyTag }]
+    }
   });
 
   // Resource tag handlers
   const addTagGroup = (type: SupportedResourceTypes, resourceIndex: number) => {
     setTags((prevState: any) => ({
       ...prevState,
-      [`${type}-${resourceIndex}`]: [{ ...emptyTag }]
+      [`${type}-${resourceIndex}`]: {
+        comesFromExisting: false,
+        tagList: [{ ...emptyTag }]
+      }
     }));
   };
   const addTagToGroup = (
@@ -85,11 +91,14 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
     resourceIndex: number
   ) => {
     const group = `${type}-${resourceIndex}`;
-    const updatedTagList = tags[group];
+    const updatedTagList = tags[group].tagList;
     updatedTagList.push({ ...emptyTag });
     setTags((prevState: any) => ({
       ...prevState,
-      [`${group}`]: updatedTagList
+      [`${group}`]: {
+        comesFromExisting: false,
+        tagList: updatedTagList
+      }
     }));
   };
   const removeTagGroup = (
@@ -116,13 +125,16 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
     indexToRemove: number
   ) => {
     const group = `${type}-${resourceIndex}`;
-    const tagList = tags[group];
+    const tagList = tags[group].tagList;
     const updatedTagList = tagList.filter(
       (tag: Tag, index: number) => index !== indexToRemove
     );
     setTags((prevState: any) => ({
       ...prevState,
-      [`${group}`]: updatedTagList
+      [`${group}`]: {
+        comesFromExisting: false,
+        tagList: updatedTagList
+      }
     }));
   };
 
@@ -132,6 +144,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
       ...prevState,
       {
         index: resourceIndex,
+        comesFromExisting: name ? true : false,
         visible: true,
         name: name ? name : '',
         tags: []
@@ -161,6 +174,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
       ...prevState,
       {
         index: resourceIndex,
+        comesFromExisting: name ? true : false,
         visible: true,
         name: name ? name : '',
         tags: [],
@@ -193,6 +207,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
       ...prevState,
       {
         index: resourceIndex,
+        comesFromExisting: name ? true : false,
         visible: true,
         name: name ? name : '',
         tags: [],
@@ -234,6 +249,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
       ...prevState,
       {
         index: resourceIndex,
+        comesFromExisting: name ? true : false,
         visible: true,
         name: name ? name : '',
         tags: [],
@@ -399,7 +415,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
 
     if (type === 'Tag') {
       const tagIndex = Number(event.target.id.split('-')[3]);
-      const updatedTagList = tags[`${belongsTo}-${index}`]; // [{name:'', value:''}, ...]
+      const updatedTagList = tags[`${belongsTo}-${index}`].tagList; // [{name:'', value:''}, ...]
       if (input === 'tagName') {
         updatedTagList[tagIndex]['name'] = event.target.value;
       } else if (input === 'tagValue') {
@@ -408,7 +424,10 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
 
       setTags((prevState: any) => ({
         ...prevState,
-        [`${belongsTo}-${index}`]: updatedTagList
+        [`${belongsTo}-${index}`]: {
+          comesFromExisting: false,
+          tagList: updatedTagList
+        }
       }));
     }
   };
@@ -470,7 +489,12 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
     setAPSs([]);
     setPGChecked(false);
     setPGs([]);
-    setTags({ [`ALL-0`]: [{ ...emptyTag }] });
+    setTags({
+      [`ALL-0`]: {
+        comesFromExisting: false,
+        tagList: [{ ...emptyTag }]
+      }
+    });
   };
   const submitForm = (event: React.MouseEvent<HTMLButtonElement>) => {
     // We don't want the enter key to submit our form
@@ -500,7 +524,12 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
     let appInsights = false;
     let databaseNames: string[] = [];
     let fwRules: DatabaseFirewallRule[] = [];
-    let tagsObject: ResourceTagGroups = { [`ALL-0`]: [{ ...emptyTag }] };
+    let tagsObject: ResourceTagGroups = {
+      [`ALL-0`]: {
+        comesFromExisting: false,
+        tagList: [{ ...emptyTag }]
+      }
+    };
 
     function handleApplicationSubResources(resource: any) {
       if (resource.properties.siteConfig.linuxFxVersion === 'DOTNETCORE|7.0') {
@@ -556,7 +585,10 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           for (const [key, value] of Object.entries(resource.tags)) {
             tagList.push({ name: key, value: value });
           }
-          tagsObject[`SA-${SAcounter}`] = tagList;
+          tagsObject[`SA-${SAcounter}`] = {
+            comesFromExisting: true,
+            tagList
+          };
         }
 
         SAcounter++;
@@ -573,7 +605,10 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           for (const [key, value] of Object.entries(resource.tags)) {
             tagList.push({ name: key, value: value });
           }
-          tagsObject[`FA-${FAcounter}`] = tagList;
+          tagsObject[`FA-${FAcounter}`] = {
+            comesFromExisting: true,
+            tagList
+          };
         }
 
         FAcounter++;
@@ -590,7 +625,10 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           for (const [key, value] of Object.entries(resource.tags)) {
             tagList.push({ name: key, value: value });
           }
-          tagsObject[`APS-${APScounter}`] = tagList;
+          tagsObject[`APS-${APScounter}`] = {
+            comesFromExisting: true,
+            tagList
+          };
         }
 
         APScounter++;
@@ -640,7 +678,10 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           for (const [key, value] of Object.entries(resource.tags)) {
             tagList.push({ name: key, value: value });
           }
-          tagsObject[`PG-${PGcounter}`] = tagList;
+          tagsObject[`PG-${PGcounter}`] = {
+            comesFromExisting: true,
+            tagList
+          };
         }
 
         PGcounter++;

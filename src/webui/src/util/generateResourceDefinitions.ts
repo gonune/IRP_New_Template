@@ -46,7 +46,7 @@ const formatTags = ({ tags, SAs, FAs, APSs, PGs }: defineResources) => {
         tagIndex = Number(key.split('-')[1]); // eg. 0
 
         if ((type === resourceType && index === tagIndex) || type === 'ALL') {
-          value.forEach((tag: Tag) => {
+          value.tagList.forEach((tag: Tag) => {
             const updatedTag = flattenKeyStructure(tag);
             if (Object.keys(updatedTag)[0] !== '') {
               updatedTags.push(updatedTag);
