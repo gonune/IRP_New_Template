@@ -57,7 +57,9 @@ export const currentUserSlice = createSlice({
       reformattedCurrentUser.sur_name = action.payload.jobTitle;
       reformattedCurrentUser.user_principal_name =
         action.payload.userPrincipalName;
-      reformattedCurrentUser.roles = action.payload.roles;
+      if (action.payload.roles) {
+        reformattedCurrentUser.roles = action.payload.roles;
+      }
       reformattedCurrentUser.id_token = action.payload.idToken;
 
       // Update the object in the state store with our new object
