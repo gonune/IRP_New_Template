@@ -29,8 +29,7 @@ interface NewTemplateFormProps {
 }
 
 // TODO: Update from existing needs
-// - Intake tag more than one tag per resource when multiple resources are selected
-// - Support or disabling for removing resources that were already created
+// - Delete original file and upload the new one
 // - Figure out how to update resource factory to intake pre-exising SA name for applications
 // - Include monitoring box is checked no matter what
 // TODO: Design stuff
@@ -75,6 +74,7 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
       tagList: [{ ...emptyTag }]
     }
   });
+  console.log(tags);
 
   // Resource tag handlers
   const addTagGroup = (type: SupportedResourceTypes, resourceIndex: number) => {
@@ -589,6 +589,11 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
             comesFromExisting: true,
             tagList
           };
+        } else {
+          tagsObject[`SA-${SAcounter}`] = {
+            comesFromExisting: false,
+            tagList: [{ ...emptyTag }]
+          };
         }
 
         SAcounter++;
@@ -609,6 +614,11 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
             comesFromExisting: true,
             tagList
           };
+        } else {
+          tagsObject[`FA-${FAcounter}`] = {
+            comesFromExisting: false,
+            tagList: [{ ...emptyTag }]
+          };
         }
 
         FAcounter++;
@@ -628,6 +638,11 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           tagsObject[`APS-${APScounter}`] = {
             comesFromExisting: true,
             tagList
+          };
+        } else {
+          tagsObject[`APS-${APScounter}`] = {
+            comesFromExisting: false,
+            tagList: [{ ...emptyTag }]
           };
         }
 
@@ -681,6 +696,11 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
           tagsObject[`PG-${PGcounter}`] = {
             comesFromExisting: true,
             tagList
+          };
+        } else {
+          tagsObject[`PG-${PGcounter}`] = {
+            comesFromExisting: false,
+            tagList: [{ ...emptyTag }]
           };
         }
 

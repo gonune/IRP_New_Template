@@ -38,6 +38,12 @@ const OperationButtons: React.FC<OperationButtonsProps> = ({
   }
 };
 
+// After hitting submit on the existing template page, set the operation
+// to newWithExistingTemplate. Show same return() for 'new' and 'newWith...'
+// Then pass the operation to the ResultModal; if 'newWith...' then the
+// result modal knows to call the deleteThenUploadToGitHub function, which
+// needs to be written.
+
 export const NewTemplatePage: React.FC = () => {
   const [operation, setOperation] = useState<'' | 'new' | 'existing'>('');
   const [operationSelected, setOperationSelected] = useState(false);
@@ -53,8 +59,6 @@ export const NewTemplatePage: React.FC = () => {
       setOperationSelected(true);
     }
   };
-
-  const handleStartOver = () => {};
 
   return (
     <div>
