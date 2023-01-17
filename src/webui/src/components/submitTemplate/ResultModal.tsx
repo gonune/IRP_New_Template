@@ -23,6 +23,8 @@ interface ResultModalProps {
   modal: boolean;
   toggleModal: any;
   contents: any;
+  operation: '' | 'new' | 'existing' | 'newFromExisting';
+  clearFormInputs: Function;
 }
 
 interface ResponseMessageProps {
@@ -47,7 +49,7 @@ const DownloadLink: React.FC<DownloadLinkProps> = ({
   downloadFile,
   githubChecked
 }) => {
-  if (responseStatus === 201 && githubChecked) {
+  if (responseStatus === 201 || (responseStatus === 200 && githubChecked)) {
     return (
       <CustomButton color="link" onClick={() => downloadFile(contentsStr)}>
         Local download (optional)
@@ -68,7 +70,10 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 }) => {
   if (status === 0 && loadingFlag) {
     return <Spinner className="m-auto" color="primary" />;
-  } else if (status === 201 && message !== '') {
+  } else if (
+    (status === 201 && message !== '') ||
+    (status === 200 && message !== '')
+  ) {
     return (
       <Alert color="primary">
         {message}
@@ -96,7 +101,9 @@ const ResponseMessage: React.FC<ResponseMessageProps> = ({
 export const ResultModal: React.FC<ResultModalProps> = ({
   modal,
   toggleModal,
-  contents
+  contents,
+  operation,
+  clearFormInputs
 }) => {
   const [githubChecked, setGithubChecked] = useState(false);
   const [repoOwner, setRepoOwner] = useState('sas-institute-solutions-factory');
@@ -124,6 +131,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({
   };
 
   const handleReset = () => {
+    clearFormInputs();
     setGithubChecked(false);
     setDownloadChecked(false);
     setRepoOwner('sas-institute-solutions-factory');
@@ -168,18 +176,25 @@ export const ResultModal: React.FC<ResultModalProps> = ({
         });
 
         let contentsB64 = Buffer.from(contentsStr).toString('base64');
+        let replaceExisting = false;
+
+        if (operation === 'newFromExisting') {
+          replaceExisting = true;
+        }
+
         uploadToGitHubViaApi(
           repoOwner,
           repoName,
           REACT_APP_GITHUB_PAT, // HACK: Need to replace with Github Apps
-          contentsB64
+          contentsB64,
+          replaceExisting
         )
-          .then((response) => {
+          .then((response: any) => {
             if (response.status) {
               setResponse({
                 loading: false,
                 status: response.status,
-                message: `Your new template was successfully uploaded! Check it out at ${response.data.content.path} in your repo.`
+                message: `Your new template was successfully uploaded! Check it out at "${response.data.content.path}" in your repo.`
               });
             } else {
               setResponse({
@@ -189,15 +204,17 @@ export const ResultModal: React.FC<ResultModalProps> = ({
               });
             }
           })
-          .catch((error) => {
+          .catch((error: any) => {
             if (error instanceof AxiosError) {
               if (error.response) {
-                if (error.response.status === 422) {
+                if (operation === 'new' && error.response.status === 422) {
                   setResponse({
                     loading: false,
                     status: error.response.status,
                     message:
-                      'This application currently does not support updating existing builds in a given repository'
+                      'There is already a build template uploaded to that repository. You can copy its ' +
+                      'contents from `.github/build/deploy-json.yml` from your reposity and paste them ' +
+                      'into this app using the "Start from an existing template" button on the next screen.'
                   });
                 } else if (error.response.status === 404) {
                   setResponse({
@@ -299,7 +316,9 @@ export const ResultModal: React.FC<ResultModalProps> = ({
       <ModalFooter>
         <CustomButton
           color="primary"
-          disabled={response.status === 201 ? true : false}
+          disabled={
+            response.status === 201 || response.status === 200 ? true : false
+          }
           onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
             handleProceed(event)
           }
@@ -307,7 +326,9 @@ export const ResultModal: React.FC<ResultModalProps> = ({
           Proceed
         </CustomButton>
         <CustomButton color="secondary" onClick={handleClose}>
-          {response.status === 201 ? 'Close' : 'Cancel'}
+          {response.status === 201 || response.status === 200
+            ? 'Close'
+            : 'Cancel'}
         </CustomButton>
       </ModalFooter>
     </Modal>

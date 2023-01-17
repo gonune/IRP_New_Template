@@ -19,11 +19,14 @@ import {
 import { ResourceInputs } from '../../components/newTemplate/ResourceInputs';
 import { ResourceTagInputs } from '../../components/newTemplate/ResourceTagInputs';
 import { defineResources } from '../../util/generateResourceDefinitions';
+import { ResultModal } from '../../components/submitTemplate/ResultModal';
 
 interface NewTemplateFormProps {
-  toggleModal: Function;
+  resultModal: boolean;
+  toggleResultModal: Function;
+  contents: any;
   setContents: Function;
-  operation: string;
+  operation: '' | 'new' | 'existing' | 'newFromExisting';
   setOperation: Function;
   setOperationSelected: Function;
 }
@@ -45,7 +48,9 @@ interface NewTemplateFormProps {
 // Reusable componentry exists in stateless form in this sub-directory
 // https://itnext.io/how-to-build-a-dynamic-controlled-form-with-react-hooks-2019-b39840f75c4f
 export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
-  toggleModal,
+  resultModal,
+  toggleResultModal,
+  contents,
   setContents,
   operation,
   setOperation,
@@ -74,7 +79,6 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
       tagList: [{ ...emptyTag }]
     }
   });
-  console.log(tags);
 
   // Resource tag handlers
   const addTagGroup = (type: SupportedResourceTypes, resourceIndex: number) => {
@@ -503,9 +507,9 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
     // Call factory to define resources
     const response = defineResources({ tags, SAs, FAs, APSs, PGs });
     setContents(response);
-    toggleModal();
+    toggleResultModal();
 
-    clearInputs();
+    //clearInputs();
   };
   const submitExistingTemplate = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -709,10 +713,10 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
     });
 
     setTags(tagsObject);
-    setOperation('new');
+    setOperation('newFromExisting');
   };
 
-  if (operation === 'new') {
+  if (operation === 'new' || operation === 'newFromExisting') {
     return (
       <div style={{ paddingTop: 50, paddingLeft: 30, paddingBottom: 30 }}>
         <Form>
@@ -892,6 +896,13 @@ export const NewTemplateForm: React.FC<NewTemplateFormProps> = ({
         <CustomButton color="secondary" onClick={clearInputs}>
           Start over
         </CustomButton>
+        <ResultModal
+          modal={resultModal}
+          toggleModal={toggleResultModal}
+          contents={contents}
+          operation={operation}
+          clearFormInputs={clearInputs}
+        />
       </div>
     );
   } else if (operation === 'existing') {

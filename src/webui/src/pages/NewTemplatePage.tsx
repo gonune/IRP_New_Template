@@ -3,7 +3,6 @@ import { Alert } from 'reactstrap';
 
 import { CustomButton } from '../components/genericHOCs/CustomButton';
 import { NewTemplateForm } from '../components/newTemplate/NewTemplateForm';
-import { ResultModal } from '../components/submitTemplate/ResultModal';
 
 interface OperationButtonsProps {
   handleOperationButtonClick: Function;
@@ -45,7 +44,9 @@ const OperationButtons: React.FC<OperationButtonsProps> = ({
 // needs to be written.
 
 export const NewTemplatePage: React.FC = () => {
-  const [operation, setOperation] = useState<'' | 'new' | 'existing'>('');
+  const [operation, setOperation] = useState<
+    '' | 'new' | 'existing' | 'newFromExisting'
+  >('');
   const [operationSelected, setOperationSelected] = useState(false);
   const [resultModal, setResultModal] = useState(false);
   const toggleResultModal = () => setResultModal(!resultModal);
@@ -78,7 +79,9 @@ export const NewTemplatePage: React.FC = () => {
           Use this form to create a new, deployable template of cloud resources
         </h4>
         <NewTemplateForm
-          toggleModal={toggleResultModal}
+          resultModal={resultModal}
+          toggleResultModal={toggleResultModal}
+          contents={results}
           setContents={setResults}
           operation={operation}
           setOperation={setOperation}
@@ -89,11 +92,6 @@ export const NewTemplatePage: React.FC = () => {
           operationSelected={operationSelected}
         />
       </Alert>
-      <ResultModal
-        modal={resultModal}
-        toggleModal={toggleResultModal}
-        contents={results}
-      />
     </div>
   );
 };
