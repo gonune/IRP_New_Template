@@ -56,7 +56,8 @@ function renderTabs(props: NavBarProps) {
   const tabInfo: TabInfo[] = [
     { name: 'New Template', path: '/newTemplate' },
     { name: 'View Templates', path: '/templates' },
-    { name: 'Settings', path: '/settings' }
+    { name: 'Settings', path: '/settings' },
+    { name: 'Example Page', path: '/examplePage' }
   ];
 
   if (props.isAuthenticated) {

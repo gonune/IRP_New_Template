@@ -85,6 +85,7 @@ const Carousel: React.FC<CarouselProps> = (props) => {
   // These are all being hardcoded as examples but its much more likely that they
   // would actually be implemented inside of a slide of Redux state which would hold
   // some items returned from an API call along with a loading flag
+  //TODO: Implemented in a Slice of state? - ExampleCarouselItems returns components that retrieve data in different ways.
   const carouselItems: CarouselItem[] = hardcodedExampleCarouselItems;
   const carouselItemsLoading = false;
 

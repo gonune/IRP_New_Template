@@ -83,6 +83,7 @@ class App extends Component<AuthComponentProps> {
               {/*** BEGIN - SECTION TO BE EDITED FOR EACH NEW PROJECT ***/}
               <Route path="/newTemplate" element={<NewTemplatePage />} />
               <Route path="/templates" element={<ListTemplatesPage />} />
+              <Route path="/examplePage" element={<ExamplePage />} />
               {/* We are wrapping route(s) with this route which renders an instance of the */}
               {/* RequireAuth component. That component takes an array of roles that the user */}
               {/* must have associated to them in order to view the elements rendered by the */}

@@ -33,6 +33,7 @@ type CatalogItemAPIList = {
   items: CatalogItem[];
 };
 
+//TODO: Do we need to include the, "Configure the store" steps?
 // When we create an API with RTK we get back a slice, some thunks, action creators,
 // and a set of automatically generated hooks
 const catalogItemsApi = createApi({
@@ -108,6 +109,7 @@ const catalogItemsApi = createApi({
   }
 });
 
+//TODO: How did you get these names to export to relate to the API's you defined?
 // Export all hooks
 // !!! Please also export these from ../hooks/useAPIs.ts so we can keep
 // !!! the imports in our components cleaner
